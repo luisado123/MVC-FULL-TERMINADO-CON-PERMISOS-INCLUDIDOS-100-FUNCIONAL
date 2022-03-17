@@ -1,0 +1,137 @@
+﻿@using Common.Utils.Enums
+@using static Common.Utils.Constant.Const
+@{
+ViewData["Title"] = "Usuarios";
+
+
+
+var idRols = User.Claims.FirstOrDefault(x => x.Type == TypeClaims.IdRol).Value;
+bool isAdmin = idRols.Any(x => x.ToString() == Convert.ToInt32(Enums.RolUser.Administrador).ToString());
+bool isEstand = idRols.Any(x => x.ToString() == Convert.ToInt32(Enums.RolUser.Estandar).ToString());
+}
+
+<h1>Listado de Usuarios</h1>
+
+
+
+ 
+
+<div class="row">
+
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Nombre</th>
+                <th scope="col">UserName</th>
+                 <th scope="col">Rol</th>
+
+            </tr>
+        </thead>
+
+        <tbody id="cuerpoUsuario"></tbody>
+    </table>
+
+</div>
+
+
+
+
+
+
+
+@section Scripts{
+  @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+<script type="text/javascript" charset="utf-8">
+    //var listaPets= JSON.parse('@Json.Serialize(@Model)');
+    var listaUsuarios= [];
+    let idUsuario='';
+  
+ 
+    $(document).ready(function () {
+     getAllUsuarios();
+       
+   
+    });
+    function getAllUsuarios()
+    {
+        modalProcesando(true);
+        $.ajax({
+            url: '@Url.Action("GetAllUsuarios", "Usuarios")',
+            method: 'GET',
+            dataType: "json",
+            success: function (data) {
+                modalProcesando(false);
+                listaUsuarios=data;
+                 console.log(listaUsuarios);
+                 if(data.success)
+                {
+                    listaUsuarios=data.result;
+                     cargarGridUsuarios(listaUsuarios);
+                   
+                }else{
+                    Swal.fire(
+                                'Opps!',
+                                data.message,
+                                'error');
+                }
+            
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                    modalProcesando(false);
+                    console.error(xhr, textStatus, errorThrown);
+                }
+         });
+    }
+
+    
+  
+
+
+    
+    
+
+
+    function cargarGridUsuarios(data){
+        
+        $("#cuerpoUsuario").html("");
+       
+         console.log("este es el cargar grid libros");
+            console.log(data);
+        for(var i=0; i<data.length; i++){
+           
+            var tr=`
+             <tr>
+             @if(isAdmin||isEstand){
+                <th>`+ data[i].name+`</th>
+                <th> `+ data[i].userName +`</th>
+                    <th> `+ data[i].rol +`</th>
+             }
+            </tr>
+            `;
+            $("#cuerpoUsuario").append(tr);
+        }
+    }
+
+     
+
+   
+
+
+    
+       
+   
+ 
+   
+  
+   
+   
+
+    
+ 
+  
+ 
+</script>
+}
